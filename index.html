@@ -573,7 +573,7 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px}
       <div class="eyebrow">06 · Findings</div>
       <div>
         <h2>What stood out while clicking through</h2>
-        <p class="lead">The three findings that matter most, each with a screenshot from the read-only demo workspace (Seminyak Villas SAS). Red boxes mark the evidence. Click a screenshot to enlarge it.</p>
+        <p class="lead">The four findings that matter most. Each was checked in the read-only demo workspace and again hands-on in a real Pro account with a test villa in Badung and test bookings. Red boxes mark the evidence. Click a screenshot to enlarge it.</p>
       </div>
     </div>
     <div class="finds">
@@ -596,10 +596,10 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px}
         <div class="txt">
           <span class="num">2</span>
           <span class="tag cov">Assumption</span>
-          <b>OTA bookings look like iCal and CSV, not live webhooks</b>
-          <p>In the demo, Airbnb and Booking.com are marked <b>Webhook</b>, yet both show last sync “never” and 0 bookings imported. The only inputs on each card are an iCal URL and CSV import. The connector catalogue lists two methods: iCal sync (46 platforms) and manual setup (264).</p>
-          <p><b>This is an assumption.</b> From what the demo shows, bookings do not arrive in real time. VillaTax may still have a real partnership with Airbnb or Booking.com that is switched off in demo mode or enabled per account. The “Webhook” label and the FAQ's mention of OAuth connections point that way. Confirm with VillaTax before relying on either reading.</p>
-          <p>If the connections really are iCal and CSV only, then iCal carries only dates. Revenue and every tax line would depend on CSV imports or manual entry.</p>
+          <b>“Connected” before any booking arrives</b>
+          <p>Each OTA's <b>Configure</b> dialog offers three methods: email forwarding to a per-property import address, a generic webhook URL (<code>/api/webhooks/universal?token=…</code>) and iCal. Choosing the webhook option marks the channel <b>Connected!</b> immediately, before a single booking has arrived. That is why the demo shows Airbnb and Booking.com as “Webhook” with last sync “never” and 0 bookings.</p>
+          <p><b>This is an assumption.</b> Airbnb host accounts don't generally have a setting that sends webhooks to an arbitrary URL, so the endpoint is more realistic from a PMS, channel manager or automation tool. VillaTax may still have a partner integration that isn't visible in the product. Confirm with VillaTax.</p>
+          <p>In practice, revenue and tax depend on CSV imports, forwarded emails or manual entry, because iCal only carries dates. The manual-entry form has no field for the OTA commission.</p>
         </div>
         <div class="shots">
           <button class="shot" data-cap="Operations → Integrations: 2 “live” connectors, last sync never, 0 bookings imported. Airbnb and Booking.com are labelled Webhook."><span class="chrome"><i></i><i></i><i></i><span>/dashboard/integrations</span></span><span class="pic"><img src="shots/integrations.png" alt="VillaTax integrations screen: last sync never, Airbnb and Booking.com labelled Webhook with 0 bookings imported" loading="lazy" width="2380" height="1870"><span class="hot" style="left:49.4%;top:18.4%;width:23.4%;height:13.2%"></span><span class="hot" style="left:0.8%;top:56.6%;width:47%;height:14.8%"></span><span class="hot" style="left:1%;top:84.2%;width:22.1%;height:13.6%"></span></span></button>
@@ -611,13 +611,28 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px}
         <div class="txt">
           <span class="num">3</span>
           <span class="tag bug">Bug</span>
-          <b>Occupancy shows 112%</b>
-          <p>The Analytics header shows occupancy at <b>112%</b>, which is impossible. The likely cause is that booked nights are counted across overlapping stays or divided by the wrong number of available nights.</p>
-          <p>Gross revenue also differs between screens: Rp 6.64B here and Rp 7.38B on Stays. They probably use different default periods, but nothing on the page says so.</p>
+          <b>Occupancy shows 112%: overlapping bookings are counted twice</b>
+          <p>The demo's Analytics header shows occupancy at <b>112%</b>, which is impossible. Reproduced on a real account: one 5-night booking gives <b>1%</b> for the year (5 / 365, correct). A second booking on the same villa and the same dates from another channel is accepted with no duplicate warning, and occupancy jumps to <b>3%</b> while gross revenue doubles.</p>
+          <p>Manually entered bookings also don't appear on the OTA calendar, so its conflict detection can't catch the double booking.</p>
         </div>
         <div class="shots">
           <button class="shot" data-cap="Operations → Performance: occupancy 112% in the summary row."><span class="chrome"><i></i><i></i><i></i><span>/dashboard/analytics</span></span><span class="pic"><img src="shots/analytics.png" alt="VillaTax analytics header with occupancy at 112 percent" loading="lazy" width="2360" height="950"><span class="hot" style="left:61.5%;top:25.8%;width:12.9%;height:10.4%"></span></span></button>
           <span class="cap">Operations → Performance</span>
+        </div>
+      </article>
+
+      <article class="find">
+        <div class="txt">
+          <span class="num">4</span>
+          <span class="tag bug">Bug</span>
+          <b>The tax page contradicts the fiscal setup</b>
+          <p>Test org: Perorangan, villa in Kab. Badung, stays under 30 days. The fiscal qualification concludes <b>“Jasa perhotelan: PBJT 10% on revenue, no PPh Final on rent.”</b> On the Tax page for the same org:</p>
+          <p>PBJT shows “not applicable to your current tax profile”, while the tax calendar lower on the same page lists PBJT 10% for Bapenda Badung. PPh appears under three regimes: PPh Final 4(2) 10%, SPT 1770 progressive 5–35%, and the UMKM 0.5% shown during onboarding. The PPh card says “No revenue recorded this month” next to Rp 28M of bookings.</p>
+          <p>Every tax amount is <b>Rp 0</b>, and the bookings table labels its column “Tax (20%)”. The only blocker shown is a missing NPWP, so the tax quietly drops to zero instead of being flagged as needing reconciliation.</p>
+        </div>
+        <div class="shots">
+          <button class="shot" data-cap="Tax & compliance → Tax, test org after confirming “Jasa perhotelan, PBJT 10%”: PBJT not applicable, PPh Final 4(2) 10% at Rp 0, total Rp 0 on Rp 28M gross."><span class="chrome"><i></i><i></i><i></i><span>/dashboard/tax</span></span><span class="pic"><img src="shots/tax-contradiction.png" alt="VillaTax tax page: PBJT not applicable, PPh Final 4(2) 10% Rp 0 with no revenue recorded, total tax Rp 0 on Rp 28,000,000 gross" loading="lazy" width="2320" height="590"><span class="hot" style="left:0.9%;top:41%;width:22.5%;height:10%"></span><span class="hot" style="left:36.5%;top:32.5%;width:19%;height:10%"></span><span class="hot" style="left:34.6%;top:70.5%;width:16%;height:10%"></span><span class="hot" style="left:68.6%;top:50.5%;width:15.4%;height:36%"></span></span></button>
+          <span class="cap">Tax &amp; compliance → Tax (real Pro account, test org)</span>
         </div>
       </article>
 
@@ -627,7 +642,7 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px}
 </section>
 
 <footer>
-  <div class="wrap">Sources: public pages on villa-tax.operium.store (features, integrations, architecture, tax engine, Coretax, API, pricing, FAQ, services) and the read-only demo workspace, checked 1 Nov 2026. Figures marked as demo are VillaTax sample data.</div>
+  <div class="wrap">Sources: public pages on villa-tax.operium.store (features, integrations, architecture, tax engine, Coretax, API, pricing, FAQ, services), the read-only demo workspace (1 Nov 2026) and hands-on tests in a real Pro account with a test organization (2 Nov 2026). Figures marked as demo are VillaTax sample data.</div>
 </footer>
 
 <script>
